@@ -7,6 +7,7 @@ import io.nghlong3004.penny.service.PennyService;
 import io.nghlong3004.penny.service.impl.PennerServiceImpl;
 import io.nghlong3004.penny.service.impl.PennyBotServiceImpl;
 import io.nghlong3004.penny.service.impl.PennyServiceImpl;
+import org.apache.ibatis.session.SqlSession;
 
 public final class ObjectContainer {
 
@@ -18,6 +19,10 @@ public final class ObjectContainer {
 
     private static final PennyBotService PENNY_BOT_SERVICE = PennyBotServiceImpl.getInstance(
             APPLICATION.getTelegramToken());
+
+    public static SqlSession openSession() {
+        return MyBatisUtil.openSession();
+    }
 
     public static PennyBotService getPennyBotService() {
         return PENNY_BOT_SERVICE;
@@ -37,6 +42,5 @@ public final class ObjectContainer {
     }
 
     private ObjectContainer() {
-
     }
 }

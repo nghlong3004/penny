@@ -1,6 +1,7 @@
 package io.nghlong3004.penny.service.impl;
 
 import io.nghlong3004.penny.exception.ResourceException;
+import io.nghlong3004.penny.model.Penner;
 import io.nghlong3004.penny.service.PennerService;
 import io.nghlong3004.penny.service.PennyBotService;
 import lombok.Builder;
@@ -27,8 +28,21 @@ public class PennyUpdateConsumerServiceImpl implements LongPollingSingleThreadUp
         Message message = update.getMessage();
         Chat chat = message.getChat();
         String text = message.getText();
-        log.info("{} {} with chatId = {} send message with text = {} ", chat.getFirstName(), chat.getLastName(),
-                 chat.getId(), text);
+        log.info("chatId = {} send message with text = {} ", chat.getId(), text);
+        updatePenner(chat);
+
         pennyBotService.send(chat.getId(), "reply: " + text);
+    }
+
+    private void updatePenner(Chat chat) {
+        String firstName = chat.getFirstName() == null ? "" : chat.getFirstName();
+        String lastName = chat.getLastName() == null ? "" : " " + chat.getLastName();
+        Penner penner = pennerService.getPenner(chat.getId(), firstName, lastName);
+        if (penner.getId() == null) {
+            pennerService.addPenner(penner);
+        }
+        else {
+            pennerService.updatePenner(penner);
+        }
     }
 }

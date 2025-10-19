@@ -10,9 +10,9 @@ import java.util.Properties;
 @Slf4j
 public final class ApplicationConfiguration {
     private final Properties properties;
-    private static final String NAME_FILE = "application";
-    private static final String TYPE_FILE = ".properties";
-    private static final String BASE_PROP_KEY = "application.profiles.active";
+    private final String nameFile = "application";
+    private final String typeFile = ".properties";
+    private final String environment;
 
     private static final ApplicationConfiguration INSTANCE = new ApplicationConfiguration();
 
@@ -26,25 +26,50 @@ public final class ApplicationConfiguration {
         properties = new Properties();
         try {
             loadFromClasspath(getFilePath(""));
-            String active = getPropertyValue(BASE_PROP_KEY);
-            if (active != null && !active.isBlank()) {
-                loadFromClasspath(getFilePath(active));
+            String BASE_PROP_KEY = "application.profiles.environment";
+            environment = getPropertyValue(BASE_PROP_KEY);
+            if (!environment.isBlank()) {
+                loadFromClasspath(getFilePath(environment));
             }
-            log.info("Loaded {} successfully", NAME_FILE);
+            log.info("Loaded {} successfully", nameFile);
         } catch (IOException e) {
-            log.error("{} error close file: message {}", NAME_FILE + TYPE_FILE, e.getMessage());
+            log.error("{} error close file: message {}", nameFile + typeFile, e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    public String getEnvironment() {
+        return environment.isBlank() ? "unknow" : environment;
     }
 
     public String getTelegramToken() {
         return getPropertyValue("telegram.token");
     }
 
+    public String getDataSourceUrl() {
+        return getPropertyValue("datasource.url");
+    }
+
+    public String getDataSourceDriverClassName() {
+        return getPropertyValue("datasource.driver-class-name");
+    }
+
+    public String getDataSourceUsername() {
+        return getPropertyValue("datasource.username");
+    }
+
+    public String getDataSourcePassword() {
+        return getPropertyValue("datasource.password");
+    }
+
+    public String getMybatisPackageName() {
+        return getPropertyValue("mybatis.package.name");
+    }
+
     private String getPropertyValue(String key) {
         String value = properties.getProperty(key);
         if (value == null || value.isBlank()) {
-            value = null;
+            value = "";
             log.warn("Missing property: {} ", key);
         }
         return value;
@@ -73,9 +98,9 @@ public final class ApplicationConfiguration {
 
     private String getFilePath(String active) {
         if (active == null || active.isBlank()) {
-            return NAME_FILE + TYPE_FILE;
+            return nameFile + typeFile;
         }
-        return NAME_FILE + "-" + active.trim() + TYPE_FILE;
+        return nameFile + "-" + active.trim() + typeFile;
     }
 
 }

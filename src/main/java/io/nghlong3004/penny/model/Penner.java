@@ -3,7 +3,7 @@ package io.nghlong3004.penny.model;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @Data
 @Builder
@@ -13,6 +13,6 @@ public class Penner {
     private String firstName;
     private String lastName;
     private PennerStatus status;
-    private LocalDateTime updated;
-    private LocalDateTime created;
+    private Timestamp updated;
+    private Timestamp created;
 }
