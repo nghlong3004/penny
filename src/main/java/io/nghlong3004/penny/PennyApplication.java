@@ -5,7 +5,7 @@ import io.nghlong3004.penny.util.ObjectContainer;
 
 public class PennyApplication {
     public static void main(String[] args) {
-        PennyService pennyService = ObjectContainer.getPennyService();
-        pennyService.run();
+        PennyService penny = ObjectContainer.getPennyService();
+        penny.run();
     }
 }
