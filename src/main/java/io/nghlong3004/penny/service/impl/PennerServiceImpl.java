@@ -5,7 +5,7 @@ import io.nghlong3004.penny.model.Penner;
 import io.nghlong3004.penny.model.PennerStatus;
 import io.nghlong3004.penny.repository.PennerRepository;
 import io.nghlong3004.penny.service.PennerService;
-import io.nghlong3004.penny.service.PennyBotService;
+import io.nghlong3004.penny.telegram.TelegramProcessorExecutor;
 import io.nghlong3004.penny.util.ObjectContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.exceptions.PersistenceException;
@@ -17,7 +17,7 @@ import java.util.List;
 public class PennerServiceImpl implements PennerService {
 
     private static PennerService instance;
-    private final PennyBotService pennyBotService;
+    private final TelegramProcessorExecutor telegramProcessorExecutor;
 
     @Override
     public Penner getPenner(Long chatId, String firstName, String lastName) {
@@ -31,7 +31,7 @@ public class PennerServiceImpl implements PennerService {
                                                           .status(PennerStatus.NOT_LINKED)
                                                           .build());
         } catch (PersistenceException e) {
-            pennyBotService.send(chatId, "Có một chút lỗi nhỏ...");
+            telegramProcessorExecutor.executor(chatId, "Có một chút lỗi nhỏ...");
             throw new ResourceException(e.getLocalizedMessage());
         }
     }
@@ -40,8 +40,7 @@ public class PennerServiceImpl implements PennerService {
     public List<Penner> getAllPenner() {
         try (SqlSession session = ObjectContainer.openSession()) {
             PennerRepository pennerRepository = session.getMapper(PennerRepository.class);
-            return pennerRepository.getAllPenner()
-                                   .orElseGet(List::of);
+            return pennerRepository.getAllPenner().orElseGet(List::of);
         }
     }
 
@@ -61,7 +60,7 @@ public class PennerServiceImpl implements PennerService {
             pennerRepository.update(penner);
             session.commit();
         } catch (PersistenceException e) {
-            pennyBotService.send(penner.getChatId(), "Có một chút lỗi nhỏ...");
+            telegramProcessorExecutor.executor(penner.getChatId(), "Có một chút lỗi nhỏ...");
             throw new ResourceException(e.getLocalizedMessage());
         }
     }
@@ -73,7 +72,7 @@ public class PennerServiceImpl implements PennerService {
             pennerRepository.deletePennerByChatId(chatId);
             session.commit();
         } catch (PersistenceException e) {
-            pennyBotService.send(chatId, "Có một chút lỗi nhỏ...");
+            telegramProcessorExecutor.executor(chatId, "Có một chút lỗi nhỏ...");
             throw new ResourceException(e.getLocalizedMessage());
         }
     }
@@ -86,6 +85,6 @@ public class PennerServiceImpl implements PennerService {
     }
 
     private PennerServiceImpl() {
-        this.pennyBotService = ObjectContainer.getPennyBotService();
+        this.telegramProcessorExecutor = ObjectContainer.getTelegramProcessorExecutorProcessorExecutor();
     }
 }

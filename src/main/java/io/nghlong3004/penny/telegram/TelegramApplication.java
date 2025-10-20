@@ -1,6 +1,5 @@
-package io.nghlong3004.penny.service.impl;
+package io.nghlong3004.penny.telegram;
 
-import io.nghlong3004.penny.service.PennyService;
 import io.nghlong3004.penny.util.ObjectContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
@@ -8,13 +7,12 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Slf4j
-public class PennyServiceImpl implements PennyService {
+public class TelegramApplication {
 
     private final TelegramBotsLongPollingApplication botsLongPollingApplication;
 
-    private static PennyService instance;
+    private static TelegramApplication instance;
 
-    @Override
     public void run() {
         try {
             LongPollingSingleThreadUpdateConsumer updateConsumerService = getUpdateConsumer();
@@ -27,32 +25,31 @@ public class PennyServiceImpl implements PennyService {
         }
     }
 
-    public static PennyService getInstance() {
+    public static TelegramApplication getInstance() {
         if (instance == null) {
-            instance = new PennyServiceImpl();
+            instance = new TelegramApplication();
         }
         return instance;
     }
 
-    private PennyServiceImpl() {
+    private TelegramApplication() {
         this.botsLongPollingApplication = new TelegramBotsLongPollingApplication();
     }
 
     private void holdThread() throws InterruptedException {
-        Thread.currentThread()
-              .join();
+        Thread.currentThread().join();
     }
 
     private String getToken() {
-        return ObjectContainer.getApplication()
-                              .getTelegramToken();
+        return ObjectContainer.getApplication().getTelegramToken();
     }
 
     private LongPollingSingleThreadUpdateConsumer getUpdateConsumer() {
-        return PennyUpdateConsumerServiceImpl.builder()
-                                             .pennerService(ObjectContainer.getPennerService())
-                                             .pennyBotService(ObjectContainer.getPennyBotService())
-                                             .build();
+        return TelegramUpdateConsumer.builder()
+                                     .pennerService(ObjectContainer.getPennerService())
+                                     .telegramProcessorExecutor(
+                                             ObjectContainer.getTelegramProcessorExecutorProcessorExecutor())
+                                     .build();
     }
 
 }

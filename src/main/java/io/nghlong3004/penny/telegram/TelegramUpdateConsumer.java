@@ -1,9 +1,8 @@
-package io.nghlong3004.penny.service.impl;
+package io.nghlong3004.penny.telegram;
 
 import io.nghlong3004.penny.exception.ResourceException;
 import io.nghlong3004.penny.model.Penner;
 import io.nghlong3004.penny.service.PennerService;
-import io.nghlong3004.penny.service.PennyBotService;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
@@ -13,15 +12,14 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 @Slf4j
 @Builder
-public class PennyUpdateConsumerServiceImpl implements LongPollingSingleThreadUpdateConsumer {
+public class TelegramUpdateConsumer implements LongPollingSingleThreadUpdateConsumer {
 
     private final PennerService pennerService;
-    private final PennyBotService pennyBotService;
+    private final TelegramProcessorExecutor telegramProcessorExecutor;
 
     @Override
     public void consume(Update update) {
-        if (!update.hasMessage() || !update.getMessage()
-                                           .hasText()) {
+        if (!update.hasMessage() || !update.getMessage().hasText()) {
             log.debug("This is not text message");
             throw new ResourceException("This is not text message");
         }
@@ -31,7 +29,7 @@ public class PennyUpdateConsumerServiceImpl implements LongPollingSingleThreadUp
         log.info("chatId = {} send message with text = {} ", chat.getId(), text);
         updatePenner(chat);
 
-        pennyBotService.send(chat.getId(), "reply: " + text);
+        telegramProcessorExecutor.executor(chat.getId(), "reply: " + text);
     }
 
     private void updatePenner(Chat chat) {
