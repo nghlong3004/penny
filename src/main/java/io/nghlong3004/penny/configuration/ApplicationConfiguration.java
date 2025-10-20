@@ -66,6 +66,14 @@ public final class ApplicationConfiguration {
         return getPropertyValue("mybatis.package.name");
     }
 
+    public String getApplicationName() {
+        return getPropertyValue("application.name");
+    }
+
+    public int getApplicationPort() {
+        return Integer.parseInt(getPropertyValue("application.port"));
+    }
+
     private String getPropertyValue(String key) {
         String value = properties.getProperty(key);
         if (value == null || value.isBlank()) {
@@ -88,8 +96,7 @@ public final class ApplicationConfiguration {
     }
 
     private InputStream getResourceAsStream(String normalizedPath) {
-        ClassLoader classLoader = Thread.currentThread()
-                                        .getContextClassLoader();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
             classLoader = ApplicationConfiguration.class.getClassLoader();
         }

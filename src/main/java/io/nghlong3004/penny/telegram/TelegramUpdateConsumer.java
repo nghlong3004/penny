@@ -39,8 +39,6 @@ public class TelegramUpdateConsumer implements LongPollingSingleThreadUpdateCons
         if (penner.getId() == null) {
             pennerService.addPenner(penner);
         }
-        else {
-            pennerService.updatePenner(penner);
-        }
+
     }
 }

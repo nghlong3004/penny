@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 @Builder
 public class Expense {
     private Long id;
-    private Long pennerId;
+    private Long chatId;
     private Double amount;
     private ExpenseType type;
     private String description;
