@@ -1,55 +1,47 @@
 package io.nghlong3004.penny.telegram;
 
+import io.nghlong3004.penny.service.HandlerService;
 import io.nghlong3004.penny.util.ObjectContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Slf4j
-public class TelegramApplication {
+public final class TelegramApplication {
 
-    private final TelegramBotsLongPollingApplication botsLongPollingApplication;
-
-    private static TelegramApplication instance;
+    private static TelegramApplication INSTANCE;
+    private final String token;
 
     public void run() {
-        try {
+        try (TelegramBotsLongPollingApplication botsLongPollingApplication = new TelegramBotsLongPollingApplication()) {
+            HandlerService.loadStatuses();
             LongPollingSingleThreadUpdateConsumer updateConsumerService = getUpdateConsumer();
             log.debug("Register Bot Telegram...");
-            botsLongPollingApplication.registerBot(getToken(), updateConsumerService);
+            botsLongPollingApplication.registerBot(token, updateConsumerService);
             log.debug("Register Successfully");
             holdThread();
-        } catch (TelegramApiException | InterruptedException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static TelegramApplication getInstance() {
-        if (instance == null) {
-            instance = new TelegramApplication();
+    public static TelegramApplication getInstance(String token) {
+        if (INSTANCE == null) {
+            INSTANCE = new TelegramApplication(token);
         }
-        return instance;
+        return INSTANCE;
     }
 
-    private TelegramApplication() {
-        this.botsLongPollingApplication = new TelegramBotsLongPollingApplication();
+    private TelegramApplication(String token) {
+        this.token = token;
     }
 
     private void holdThread() throws InterruptedException {
         Thread.currentThread().join();
     }
 
-    private String getToken() {
-        return ObjectContainer.getApplication().getTelegramToken();
-    }
-
     private LongPollingSingleThreadUpdateConsumer getUpdateConsumer() {
-        return TelegramUpdateConsumer.builder()
-                                     .pennerService(ObjectContainer.getPennerService())
-                                     .telegramProcessorExecutor(
-                                             ObjectContainer.getTelegramProcessorExecutorProcessorExecutor())
-                                     .build();
+        return TelegramConsumer.builder().messageHandler(ObjectContainer.getMessageHandlerService()).build();
     }
 
 }

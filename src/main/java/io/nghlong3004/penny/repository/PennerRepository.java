@@ -9,15 +9,23 @@ import java.util.Optional;
 @Mapper
 public interface PennerRepository {
     @Insert("""
-            INSERT INTO penner (chat_id, first_name, last_name, status)
-            VALUES (#{chatId}, #{firstName}, #{lastName}, #{status}::penner_status);
+            INSERT INTO penner (chat_id, first_name, last_name, spreadsheets_id, status)
+            VALUES (#{chatId}, #{firstName}, #{lastName}, #{spreadsheetsId}, #{status}::penner_status);
             """)
     void insert(Penner penner);
+
+    @Select("""
+            SELECT spreadsheets_id FROM penner
+            WHERE chat_id = #{chatId};
+            """)
+    String getSpreadsheetsId(Long chatId);
 
     @Update("""
             UPDATE penner
             SET first_name = #{firstName},
                 last_name  = #{lastName},
+                chat_id    = #{chatId},
+                spreadsheets_id = #{spreadsheetsId},
                 status     = #{status}::penner_status,
                 updated    = NOW()
             WHERE chat_id  = #{chatId};
@@ -41,5 +49,5 @@ public interface PennerRepository {
             SELECT *
             FROM penner;
             """)
-    Optional<List<Penner>> getAllPenner();
+    List<Penner> getAllPenner();
 }

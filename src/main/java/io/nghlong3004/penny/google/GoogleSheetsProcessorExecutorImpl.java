@@ -19,13 +19,13 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
     }
 
     @Override
-    public String readFromSheet(String spreadsheetId, String range) {
+    public String readFromSheet(String spreadsheetsId, String range) {
         log.debug("Reading data from Google Sheets");
         try {
             ValueRange response = ObjectContainer.getGoogleSheets()
                                                  .spreadsheets()
                                                  .values()
-                                                 .get(spreadsheetId, range)
+                                                 .get(spreadsheetsId, range)
                                                  .execute();
             List<List<Object>> values = response.getValues();
             if (values == null || values.isEmpty()) {
@@ -38,7 +38,7 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
     }
 
     @Override
-    public boolean writeToSheet(String spreadsheetId, String range, List<List<Object>> data) {
+    public boolean writeToSheet(String spreadsheetsId, String range, List<List<Object>> data) {
         log.debug("Write data to Google Sheets");
         if (data == null || data.isEmpty()) {
             throw new RuntimeException("No data to write");
@@ -48,7 +48,7 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
             UpdateValuesResponse result = ObjectContainer.getGoogleSheets()
                                                          .spreadsheets()
                                                          .values()
-                                                         .update(spreadsheetId, range, body)
+                                                         .update(spreadsheetsId, range, body)
                                                          .setValueInputOption("USER_ENTERED")
                                                          .execute();
             log.debug("{} cells updated successfully", result.getUpdatedCells());
@@ -59,10 +59,10 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
     }
 
     @Override
-    public boolean insertRowAbove(String spreadsheetId, String sheetName, int rowIndex) {
+    public boolean insertRowAbove(String spreadsheetsId, String sheetName, int rowIndex) {
         log.debug("Inserting new row above rowIndex={} in sheetName={}", rowIndex, sheetName);
         try {
-            Integer sheetId = getSheetIdByName(spreadsheetId, sheetName);
+            Integer sheetId = getSheetIdByName(spreadsheetsId, sheetName);
             if (sheetId == null) {
                 throw new RuntimeException("Sheet name" + sheetName + "not found");
             }
@@ -75,7 +75,7 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
             Request request = new Request().setInsertDimension(insertReq);
             BatchUpdateSpreadsheetRequest batchReq = new BatchUpdateSpreadsheetRequest().setRequests(
                     Collections.singletonList(request));
-            ObjectContainer.getGoogleSheets().spreadsheets().batchUpdate(spreadsheetId, batchReq).execute();
+            ObjectContainer.getGoogleSheets().spreadsheets().batchUpdate(spreadsheetsId, batchReq).execute();
             log.debug("Inserted row successfully.");
             return true;
         } catch (IOException e) {

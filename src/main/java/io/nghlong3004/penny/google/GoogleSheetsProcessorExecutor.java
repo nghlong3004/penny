@@ -4,10 +4,10 @@ import java.util.List;
 
 public interface GoogleSheetsProcessorExecutor {
 
-    String readFromSheet(String spreadsheetId, String range);
+    String readFromSheet(String spreadsheetsId, String range);
 
-    boolean writeToSheet(String spreadsheetId, String range, List<List<Object>> data);
+    boolean writeToSheet(String spreadsheetsId, String range, List<List<Object>> data);
 
-    boolean insertRowAbove(String spreadsheetId, String sheetId, int rowIndex);
+    boolean insertRowAbove(String spreadsheetsId, String sheetId, int rowIndex);
 
 }

@@ -1,5 +1,6 @@
 package io.nghlong3004.penny.model;
 
+import io.nghlong3004.penny.model.type.PennerType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,7 +13,8 @@ public class Penner {
     private Long chatId;
     private String firstName;
     private String lastName;
-    private PennerStatus status;
+    private String spreadsheetsId;
+    private PennerType status;
     private Timestamp updated;
     private Timestamp created;
 }

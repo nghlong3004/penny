@@ -16,4 +16,6 @@ public interface PennerService {
 
     void deletePenner(Long chatId);
 
+    String getSpreadsheetsId(Long chatId);
+
 }

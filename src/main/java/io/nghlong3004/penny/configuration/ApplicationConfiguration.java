@@ -74,6 +74,14 @@ public final class ApplicationConfiguration {
         return Integer.parseInt(getPropertyValue("application.port"));
     }
 
+    public String getGoogleAIToken() {
+        return getPropertyValue("google.ai.token");
+    }
+
+    public String getGoogleAIModel() {
+        return getPropertyValue("google.ai.model");
+    }
+
     private String getPropertyValue(String key) {
         String value = properties.getProperty(key);
         if (value == null || value.isBlank()) {
