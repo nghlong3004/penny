@@ -68,6 +68,17 @@ public class PennerServiceImpl implements PennerService {
     }
 
     @Override
+    public void updatePenner(Long chatId, PennerType status) {
+        try (SqlSession session = ObjectContainer.openSession()) {
+            PennerRepository pennerRepository = session.getMapper(PennerRepository.class);
+            pennerRepository.updateStatusByChatId(chatId, status);
+            session.commit();
+        } catch (PersistenceException e) {
+            log.debug(e.getLocalizedMessage());
+        }
+    }
+
+    @Override
     public void deletePenner(Long chatId) {
         try (SqlSession session = ObjectContainer.openSession()) {
             PennerRepository pennerRepository = session.getMapper(PennerRepository.class);

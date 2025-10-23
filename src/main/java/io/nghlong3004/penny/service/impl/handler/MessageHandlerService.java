@@ -3,7 +3,6 @@ package io.nghlong3004.penny.service.impl.handler;
 import io.nghlong3004.penny.model.Penner;
 import io.nghlong3004.penny.model.type.PennerType;
 import io.nghlong3004.penny.service.HandlerService;
-import io.nghlong3004.penny.service.PennerService;
 import io.nghlong3004.penny.util.FileLoaderUtil;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -14,14 +13,13 @@ public class MessageHandlerService extends HandlerService {
     private final HandlerService textHandler;
     private final HandlerService commandHandler;
     private final HandlerService callbackHandler;
-    private final PennerService pennerService;
 
     public static HandlerService getInstance(HandlerService textHandler, HandlerService commandHandler,
-                                             HandlerService callbackHandler, PennerService pennerService) {
+                                             HandlerService callbackHandler) {
         if (instance == null) {
             synchronized (MessageHandlerService.class) {
                 if (instance == null) {
-                    instance = new MessageHandlerService(textHandler, commandHandler, callbackHandler, pennerService);
+                    instance = new MessageHandlerService(textHandler, commandHandler, callbackHandler);
                 }
             }
         }
@@ -48,11 +46,11 @@ public class MessageHandlerService extends HandlerService {
         if (message.isCommand()) {
             commandHandler.handle(update);
         }
-        else {
+        else if (message.hasText()) {
             textHandler.handle(update);
         }
         if (getStatus(chatId) == PennerType.NOT_LINKED) {
-            execute(chatId, FileLoaderUtil.loadFile("command/tips.txt"));
+            execute(chatId, FileLoaderUtil.loadFile("command/tips.html"));
         }
     }
 
@@ -62,16 +60,15 @@ public class MessageHandlerService extends HandlerService {
         String lastName = message.getChat().getLastName();
         if (getStatus(chatId) == null) {
             updateStatus(chatId, PennerType.NOT_LINKED);
-            pennerService.addPenner(ofPenner(chatId, firstName, lastName));
+            addPenner(ofPenner(chatId, firstName, lastName));
         }
     }
 
     private MessageHandlerService(HandlerService textHandler, HandlerService commandHandler,
-                                  HandlerService callbackHandler, PennerService pennerService) {
+                                  HandlerService callbackHandler) {
         this.textHandler = textHandler;
         this.commandHandler = commandHandler;
         this.callbackHandler = callbackHandler;
-        this.pennerService = pennerService;
 
     }
 

@@ -1,6 +1,7 @@
 package io.nghlong3004.penny.repository;
 
 import io.nghlong3004.penny.model.Penner;
+import io.nghlong3004.penny.model.type.PennerType;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -31,6 +32,16 @@ public interface PennerRepository {
             WHERE chat_id  = #{chatId};
             """)
     void update(Penner penner);
+
+    @Update("""
+            UPDATE penner
+            SET status     = #{status}::penner_status,
+                updated    = NOW()
+            WHERE chat_id  = #{chatId};
+            """)
+    void updateStatusByChatId(
+            @Param("chatId") Long chatId,
+            @Param("status") PennerType status);
 
     @Delete("""
             DELETE

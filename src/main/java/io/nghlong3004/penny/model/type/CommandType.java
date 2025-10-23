@@ -6,12 +6,15 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum CommandType {
-    START("/start", "command/start.txt"),
+    START("/start", "command/start.html"),
     STEPS("/steps", "images/step_"),
-    SHEETS("/sheets_guide", "command/sheets_guide.txt"),
-    DEFAULT("", "command/default.txt"),
-    LINK("/link", "command/link.txt"),
-    HELP("/help", "command/help.txt");
+    SHEETS("/sheets_guide", "command/sheets_guide.html"),
+    DEFAULT("", "command/default.html"),
+    LINK("/link", "command/link.html"),
+    OUT("/out", "command/out.html"),
+    TIPS("/tips", "command/tips.html"),
+    IN_PENDING("", "command/in_pending.html"),
+    HELP("/help", "command/help.html");
     private final String command;
     private final String filePath;
 

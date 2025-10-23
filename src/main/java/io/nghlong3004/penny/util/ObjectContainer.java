@@ -50,7 +50,7 @@ public final class ObjectContainer {
     private static final HandlerService CALLBACK_HANDLER_SERVICE = CallbackHandlerService.getInstance();
 
     private static final HandlerService MESSAGE_HANDLER_SERVICE = MessageHandlerService.getInstance(
-            TEXT_HANDLER_SERVICE, COMMAND_HANDLER_SERVICE, CALLBACK_HANDLER_SERVICE, PENNER_SERVICE);
+            TEXT_HANDLER_SERVICE, COMMAND_HANDLER_SERVICE, CALLBACK_HANDLER_SERVICE);
 
     public static TelegramExecutor getTelegramExecutor() {
         return TELEGRAM_EXECUTOR;

@@ -1,6 +1,7 @@
 package io.nghlong3004.penny.service;
 
 import io.nghlong3004.penny.model.Penner;
+import io.nghlong3004.penny.model.type.PennerType;
 
 import java.util.List;
 
@@ -13,6 +14,8 @@ public interface PennerService {
     void addPenner(Penner penner);
 
     void updatePenner(Penner penner);
+
+    void updatePenner(Long chatId, PennerType status);
 
     void deletePenner(Long chatId);
 

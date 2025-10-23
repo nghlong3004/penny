@@ -1,7 +1,10 @@
 package io.nghlong3004.penny.telegram;
 
+import io.nghlong3004.penny.model.Animation;
 import io.nghlong3004.penny.model.Sticker;
 import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
@@ -33,7 +36,8 @@ public final class TelegramExecutor {
 
     public void sendMessage(Long chatId, String message, int retryTime) {
         try {
-            telegramClient.execute(SendMessage.builder().chatId(chatId).text(message).build());
+            telegramClient.execute(
+                    SendMessage.builder().chatId(chatId).parseMode(ParseMode.HTML).text(message).build());
             log.debug("Sent message to chatId={}", chatId);
         } catch (TelegramApiException e) {
             if (retryTime > 0) {
@@ -48,8 +52,12 @@ public final class TelegramExecutor {
 
     public void sendMessage(Long chatId, String message, InlineKeyboardMarkup keyboardMarkup, int retryTime) {
         try {
-            telegramClient.execute(
-                    SendMessage.builder().chatId(chatId).text(message).replyMarkup(keyboardMarkup).build());
+            telegramClient.execute(SendMessage.builder()
+                                              .chatId(chatId)
+                                              .text(message)
+                                              .parseMode(ParseMode.HTML)
+                                              .replyMarkup(keyboardMarkup)
+                                              .build());
             log.debug("Sent message with markup to chatId={}", chatId);
         } catch (TelegramApiException e) {
             if (retryTime > 0) {
@@ -59,6 +67,28 @@ public final class TelegramExecutor {
             else {
                 log.error("Failed to send message with markup to chatId={}, message = {}", chatId,
                           e.getLocalizedMessage());
+            }
+        }
+    }
+
+    public void sendAnimation(Long chatId, Animation animation, int retryTime) {
+        try {
+            InputFile inputFile = new InputFile(animation.getUrl());
+            SendAnimation sendAnimation = SendAnimation.builder()
+                                                       .chatId(chatId)
+                                                       .animation(inputFile)
+                                                       .caption(animation.getCaption())
+                                                       .parseMode(ParseMode.HTML)
+                                                       .build();
+            telegramClient.execute(sendAnimation);
+            log.debug("Sent animation from resources to chatId={}: {}", chatId, animation.getUrl());
+        } catch (TelegramApiException e) {
+            if (retryTime > 0) {
+                log.debug("Retry send animation time: {}", retryTime);
+                sendAnimation(chatId, animation, --retryTime);
+            }
+            else {
+                log.error("Failed to send animation to chatId={}, error: {}", chatId, e.getLocalizedMessage());
             }
         }
     }

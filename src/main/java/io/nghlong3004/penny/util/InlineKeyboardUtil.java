@@ -48,6 +48,7 @@ public final class InlineKeyboardUtil {
                                                                 .filter(Objects::nonNull)
                                                                 .map(rowMap -> rowMap.entrySet()
                                                                                      .stream()
+                                                                                     .sorted(Map.Entry.comparingByKey())
                                                                                      .map(e -> button(e.getKey(),
                                                                                                       e.getValue()))
                                                                                      .collect(Collectors.toList()))
