@@ -3,12 +3,16 @@ package io.nghlong3004.penny.service.impl.handler;
 import io.nghlong3004.penny.constant.GifConstant;
 import io.nghlong3004.penny.constant.TelegramConstant;
 import io.nghlong3004.penny.exception.ResourceException;
+import io.nghlong3004.penny.formatter.ResponseMessageBuilder;
 import io.nghlong3004.penny.model.Animation;
 import io.nghlong3004.penny.model.Sticker;
+import io.nghlong3004.penny.model.Transaction;
+import io.nghlong3004.penny.model.TransactionSummary;
 import io.nghlong3004.penny.model.type.CallbackType;
 import io.nghlong3004.penny.model.type.CommandType;
 import io.nghlong3004.penny.model.type.PennerType;
 import io.nghlong3004.penny.service.HandlerService;
+import io.nghlong3004.penny.service.TransactionService;
 import io.nghlong3004.penny.util.FileLoaderUtil;
 import io.nghlong3004.penny.util.GifLoaderUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -26,13 +30,16 @@ public class CommandHandlerService extends HandlerService {
 
     private static volatile HandlerService instance;
     private final Map<String, Consumer<Long>> commands;
+    private final TransactionService transactionService;
+    private final ResponseMessageBuilder messageBuilder;
 
-    public static HandlerService getInstance() {
+    public static HandlerService getInstance(TransactionService transactionService,
+                                             ResponseMessageBuilder messageBuilder) {
         if (instance == null) {
             synchronized (CommandHandlerService.class) {
                 if (instance == null) {
                     log.info("Creating new CommandHandlerService instance...");
-                    instance = new CommandHandlerService();
+                    instance = new CommandHandlerService(transactionService, messageBuilder);
                 }
             }
         }
@@ -81,7 +88,7 @@ public class CommandHandlerService extends HandlerService {
             }
             else {
                 log.warn("ChatID: {}. User in PENDING state sent unknown command: '{}'", chatId, text);
-                String responseText = FileLoaderUtil.loadFile(CommandType.IN_PENDING.getFilePath());
+                String responseText = FileLoaderUtil.loadFile(CommandType.IN_PENDING.getDetail());
                 execute(chatId, responseText);
                 execute(chatId, new Sticker(TelegramConstant.DEFAULT_JPG));
             }
@@ -90,7 +97,9 @@ public class CommandHandlerService extends HandlerService {
         }
     }
 
-    private CommandHandlerService() {
+    private CommandHandlerService(TransactionService transactionService, ResponseMessageBuilder messageBuilder) {
+        this.transactionService = transactionService;
+        this.messageBuilder = messageBuilder;
         commands = new HashMap<>();
         initializeCommands();
     }
@@ -106,15 +115,43 @@ public class CommandHandlerService extends HandlerService {
                 case OUT -> commands.put(type, this::putOut);
                 case START -> commands.put(type, this::putStart);
                 case SHEETS -> commands.put(type, this::putSheets);
+                case DAILY -> commands.put(type, this::putDaily);
+                case WEEKLY -> commands.put(type, this::putWeekly);
+                case MONTHLY -> commands.put(type, this::putMonthly);
+                case UNDO -> commands.put(type, this::putUndo);
                 default -> {
                     if (type != null && !type.isBlank()) {
-                        String message = FileLoaderUtil.loadFile(cmd.getFilePath());
+                        String message = FileLoaderUtil.loadFile(cmd.getDetail());
                         commands.put(type, chatId -> execute(chatId, message));
                     }
                 }
             }
         }
         log.info("Command map initialized with {} commands.", commands.size());
+    }
+
+    private void putUndo(Long chatId) {
+        Transaction transaction = transactionService.undoLastTransaction(chatId);
+        String message = messageBuilder.formatUndoMessage(transaction);
+        execute(chatId, message);
+    }
+
+    private void putMonthly(Long chatId) {
+        putSummary(chatId, CommandType.MONTHLY);
+    }
+
+    private void putWeekly(Long chatId) {
+        putSummary(chatId, CommandType.WEEKLY);
+    }
+
+    private void putDaily(Long chatId) {
+        putSummary(chatId, CommandType.DAILY);
+    }
+
+    private void putSummary(Long chatId, CommandType type) {
+        List<TransactionSummary> transactionSummaries = transactionService.getTransactionSummary(chatId, type);
+        String message = messageBuilder.formatSummary(type, transactionSummaries);
+        execute(chatId, message);
     }
 
     private void putStepPhone(Long chatId) {
@@ -126,7 +163,7 @@ public class CommandHandlerService extends HandlerService {
         }
         for (int i = 1; i <= 11; ++i) {
             execute(chatId, ActionType.UPLOAD_PHOTO);
-            String resourcePath = CommandType.STEPS_PHONE.getFilePath() + i + ".jpg";
+            String resourcePath = CommandType.STEPS_PHONE.getDetail() + i + ".jpg";
             execute(chatId, resourcePath, "");
         }
         log.debug("Finished 'putStepPhone' loop for ChatID: {}", chatId);
@@ -139,13 +176,13 @@ public class CommandHandlerService extends HandlerService {
             putDefault(chatId);
             return;
         }
-        String message = FileLoaderUtil.loadFile(CommandType.SHEETS.getFilePath());
+        String message = FileLoaderUtil.loadFile(CommandType.SHEETS.getDetail());
         execute(chatId, message);
     }
 
     private void putStart(Long chatId) {
         log.info("Executing 'putStart' for ChatID: {}", chatId);
-        String message = FileLoaderUtil.loadFile(CommandType.START.getFilePath());
+        String message = FileLoaderUtil.loadFile(CommandType.START.getDetail());
         message = String.format(message, getFullName(chatId));
         execute(chatId, message);
     }
@@ -153,7 +190,7 @@ public class CommandHandlerService extends HandlerService {
     private void putOut(Long chatId) {
         log.info("Executing 'putOut' for ChatID: {}", chatId);
         if (getStatus(chatId) == PennerType.PENDING) {
-            String message = FileLoaderUtil.loadFile(CommandType.OUT.getFilePath());
+            String message = FileLoaderUtil.loadFile(CommandType.OUT.getDetail());
             execute(chatId, message);
             execute(chatId, TelegramConstant.PENDING_JPG, "");
             update(chatId, PennerType.NOT_LINKED, null);
@@ -183,7 +220,7 @@ public class CommandHandlerService extends HandlerService {
         }
         for (int i = 1; i <= 7; ++i) {
             execute(chatId, ActionType.UPLOAD_PHOTO);
-            String resourcePath = CommandType.STEPS_WEB.getFilePath() + i + ".png";
+            String resourcePath = CommandType.STEPS_WEB.getDetail() + i + ".png";
             execute(chatId, resourcePath, "");
         }
         log.debug("Finished 'putStep' loop for ChatID: {}", chatId);
@@ -191,7 +228,7 @@ public class CommandHandlerService extends HandlerService {
 
     private void putDefault(Long chatId) {
         log.warn("Executing 'putDefault' (unknown command) for ChatID: {}", chatId);
-        String message = FileLoaderUtil.loadFile(CommandType.DEFAULT.getFilePath());
+        String message = FileLoaderUtil.loadFile(CommandType.DEFAULT.getDetail());
         execute(chatId, "Có vẻ như bạn gõ sai cú pháp rồi.");
         execute(chatId, Animation.builder().url(GifLoaderUtil.getRandomUrl(GifConstant.DEFAULT)).caption(null).build());
         execute(chatId, message);

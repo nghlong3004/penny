@@ -12,6 +12,7 @@ public record Transaction(
         Double amount,
         TransactionType type,
         String description,
+        Timestamp dated,
         Timestamp created
 ) {
 

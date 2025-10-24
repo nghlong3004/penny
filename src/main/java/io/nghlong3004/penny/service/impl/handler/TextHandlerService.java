@@ -22,7 +22,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -72,7 +71,7 @@ public class TextHandlerService extends HandlerService {
         }
         else {
             log.debug("ChatID: {}. User in PENDING sent non-ID text.", chatId);
-            String text = FileLoaderUtil.loadFile(CommandType.IN_PENDING.getFilePath());
+            String text = FileLoaderUtil.loadFile(CommandType.IN_PENDING.getDetail());
             execute(chatId, text);
             execute(chatId, new Sticker(TelegramConstant.DEFAULT_JPG));
         }
@@ -138,15 +137,9 @@ public class TextHandlerService extends HandlerService {
             try {
                 String spreadsheetId = getSpreadsheetsId(chatId);
                 log.debug("ChatID: {}. Attempting to write to sheet. Attempt {}/4", chatId, (5 - retries));
-                boolean success = transactionService.write(spreadsheetId, columnType, aiResponse);
-                if (success) {
-                    log.info("ChatID: {}. Successfully wrote transaction to Google Sheets.", chatId);
-                    return true;
-                }
-                else {
-                    log.warn("ChatID: {}. transactionService.write() returned false. Retries left: {}", chatId,
-                             retries - 1);
-                }
+                transactionService.write(spreadsheetId, columnType, aiResponse);
+                log.info("ChatID: {}. Successfully wrote transaction to Google Sheets.", chatId);
+                return true;
             } catch (Exception e) {
                 log.warn("ChatID: {}. Exception during Google Sheets write attempt. Retries left: {}. Error: {}",
                          chatId, retries - 1, e.getMessage());
@@ -187,11 +180,11 @@ public class TextHandlerService extends HandlerService {
     private void handleSyncDatabaseToSheets(Long chatId, String spreadsheetId) throws RuntimeException {
         List<Transaction> transactions = transactionService.getAllTransactionByChatId(chatId);
         transactions.forEach(transaction -> {
-            Timestamp date = transaction.created();
             ColumnType columnType =
                     (transaction.type() == TransactionType.INCOME) ? ColumnType.INCOME : ColumnType.EXPENSE;
+            log.info(transaction.dated().toString());
             AIResponse aiResponse = new AIResponse(transaction.description(), transaction.amount(), transaction.type(),
-                                                   date.toLocalDateTime().toString().split("T")[0], null, null);
+                                                   transaction.dated().toString().split(" ")[0], null, null);
             try {
                 transactionService.write(spreadsheetId, columnType, aiResponse);
             } catch (IOException e) {

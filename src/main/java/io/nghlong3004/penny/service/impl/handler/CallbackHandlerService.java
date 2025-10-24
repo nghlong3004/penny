@@ -68,8 +68,8 @@ public class CallbackHandlerService extends HandlerService {
 
         update(chatId, PennerType.PENDING, null);
         execute(chatId, CallbackType.YES_LINK.getReply());
-        execute(chatId, FileLoaderUtil.loadFile(CommandType.LINK.getFilePath()));
-        execute(chatId, FileLoaderUtil.loadFile(CommandType.SHEETS.getFilePath()));
+        execute(chatId, FileLoaderUtil.loadFile(CommandType.LINK.getDetail()));
+        execute(chatId, FileLoaderUtil.loadFile(CommandType.SHEETS.getDetail()));
     }
 
     private void handleNoLink(long chatId) {

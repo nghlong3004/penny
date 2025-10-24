@@ -2,6 +2,7 @@ package io.nghlong3004.penny.util;
 
 import com.google.api.services.sheets.v4.Sheets;
 import io.nghlong3004.penny.configuration.ApplicationConfiguration;
+import io.nghlong3004.penny.formatter.ResponseMessageBuilder;
 import io.nghlong3004.penny.google.GoogleSheets;
 import io.nghlong3004.penny.google.GoogleSheetsProcessorExecutor;
 import io.nghlong3004.penny.google.GoogleSheetsProcessorExecutorImpl;
@@ -43,7 +44,8 @@ public final class ObjectContainer {
 
     private static final TransactionService TRANSACTION_SERVICE = TransactionServiceImpl.getInstance();
 
-    private static final HandlerService COMMAND_HANDLER_SERVICE = CommandHandlerService.getInstance();
+    private static final HandlerService COMMAND_HANDLER_SERVICE = CommandHandlerService.getInstance(TRANSACTION_SERVICE,
+                                                                                                    new ResponseMessageBuilder());
 
     private static final HandlerService TEXT_HANDLER_SERVICE = TextHandlerService.getInstance(
             TRANSACTION_PARSER_SERVICE, TRANSACTION_SERVICE);

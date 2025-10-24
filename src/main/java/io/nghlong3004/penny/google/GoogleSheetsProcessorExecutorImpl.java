@@ -1,6 +1,7 @@
 package io.nghlong3004.penny.google;
 
 import com.google.api.services.sheets.v4.model.*;
+import io.nghlong3004.penny.exception.ResourceException;
 import io.nghlong3004.penny.util.ObjectContainer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,7 +38,7 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
     }
 
     @Override
-    public boolean writeToSheet(String spreadsheetsId, String range, List<List<Object>> data) throws IOException {
+    public void writeToSheet(String spreadsheetsId, String range, List<List<Object>> data) throws IOException {
         log.debug("Writing {} rows of data to Google Sheets. ID: {}, Range: {}", data.size(), spreadsheetsId, range);
         try {
             ValueRange body = new ValueRange().setValues(data);
@@ -49,7 +50,6 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
                                                          .execute();
             log.info("Successfully updated {} cells in Sheet ID: {}, Range: {}", result.getUpdatedCells(),
                      spreadsheetsId, range);
-            return true;
         } catch (IOException e) {
             log.error("Failed to write to Google Sheets", e);
             throw e;
@@ -57,14 +57,16 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
     }
 
     @Override
-    public boolean insertRowAbove(String spreadsheetsId, String sheetName, int rowIndex) throws IOException {
+    public void insertRowAbove(String spreadsheetsId, String sheetName, int rowIndex)
+            throws IOException, ResourceException {
         log.debug("Attempting to insert new row above rowIndex={} in sheetName={} (ID: {})", rowIndex, sheetName,
                   spreadsheetsId);
         try {
             Integer sheetId = getSheetIdByName(spreadsheetsId, sheetName);
             if (sheetId == null) {
                 log.warn("Sheet name {} not found in Spreadsheet ID: {}", sheetName, spreadsheetsId);
-                return false;
+                throw new ResourceException(
+                        String.format("Sheet name %s not found in Spreadsheet ID: %s", sheetName, spreadsheetsId));
             }
             DimensionRange dimRange = new DimensionRange().setSheetId(sheetId)
                                                           .setDimension("ROWS")
@@ -77,7 +79,6 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
                     Collections.singletonList(request));
             ObjectContainer.getGoogleSheets().spreadsheets().batchUpdate(spreadsheetsId, batchReq).execute();
             log.info("Successfully inserted row above rowIndex={} in sheetName={}", rowIndex, sheetName);
-            return true;
         } catch (IOException e) {
             log.error("Failed to insert row in Sheet ID: {}, Name: {}. Error: {}", spreadsheetsId, sheetName,
                       e.getMessage(), e);

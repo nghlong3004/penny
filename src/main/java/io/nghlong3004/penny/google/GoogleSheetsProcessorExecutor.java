@@ -7,8 +7,8 @@ public interface GoogleSheetsProcessorExecutor {
 
     String readFromSheet(String spreadsheetsId, String range) throws IOException;
 
-    boolean writeToSheet(String spreadsheetsId, String range, List<List<Object>> data) throws IOException;
+    void writeToSheet(String spreadsheetsId, String range, List<List<Object>> data) throws IOException;
 
-    boolean insertRowAbove(String spreadsheetsId, String sheetId, int rowIndex) throws IOException;
+    void insertRowAbove(String spreadsheetsId, String sheetId, int rowIndex) throws IOException;
 
 }
