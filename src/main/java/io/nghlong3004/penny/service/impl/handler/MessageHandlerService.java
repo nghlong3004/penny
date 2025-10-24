@@ -56,7 +56,7 @@ public class MessageHandlerService extends HandlerService {
         else if (message.hasText()) {
             textHandler.handle(update);
         }
-        if (getStatus(chatId) == PennerType.NOT_LINKED) {
+        if (getStatus(chatId) == PennerType.NOT_LINKED && getTips(chatId)) {
             log.debug("ChatID: {}. Status is NOT_LINKED, sending tips.", chatId);
             execute(chatId, FileLoaderUtil.loadFile("command/tips.html"));
         }

@@ -20,7 +20,7 @@ public enum CommandType {
     MONTHLY("/month", "Tổng kết tháng này:"),
     FIND("/find", ""),
     UNDO("/undo", ""),
-    DELETE("/delete", ""),
+    OFF("/off", ""),
     HELP("/help", "command/help.html");
     private final String command;
     private final String detail;

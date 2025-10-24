@@ -11,4 +11,5 @@ public class Consumer {
     private String firstName;
     private String lastName;
     private String spreadsheetsId;
+    private Boolean tips;
 }

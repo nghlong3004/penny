@@ -119,6 +119,7 @@ public class CommandHandlerService extends HandlerService {
                 case WEEKLY -> commands.put(type, this::putWeekly);
                 case MONTHLY -> commands.put(type, this::putMonthly);
                 case UNDO -> commands.put(type, this::putUndo);
+                case OFF -> commands.put(type, this::putOff);
                 default -> {
                     if (type != null && !type.isBlank()) {
                         String message = FileLoaderUtil.loadFile(cmd.getDetail());
@@ -128,6 +129,12 @@ public class CommandHandlerService extends HandlerService {
             }
         }
         log.info("Command map initialized with {} commands.", commands.size());
+    }
+
+    private void putOff(Long chatId) {
+        setTips(chatId);
+        execute(chatId, "Tắt nhắc nhở tạo google sheets thành công!");
+        execute(chatId, Animation.builder().url(GifLoaderUtil.getRandomUrl(GifConstant.HAPPY)).caption(null).build());
     }
 
     private void putUndo(Long chatId) {

@@ -29,8 +29,8 @@ public interface TransactionRepository {
                 transaction
             WHERE
                 chat_id = #{chatId}
-                AND created >= CURRENT_DATE
-                AND created < (CURRENT_DATE + INTERVAL '1 day')
+                AND dated >= CURRENT_DATE
+                AND dated < (CURRENT_DATE + INTERVAL '1 day')
             GROUP BY
                 type;
             """)
@@ -45,8 +45,8 @@ public interface TransactionRepository {
                 transaction
             WHERE
                 chat_id = #{chatId}
-                AND created >= (CURRENT_DATE - INTERVAL '6 days')
-                AND created < (CURRENT_DATE + INTERVAL '1 day')
+                AND dated >= (CURRENT_DATE - INTERVAL '6 days')
+                AND dated < (CURRENT_DATE + INTERVAL '1 day')
             GROUP BY
                 type;
             """)
@@ -61,7 +61,7 @@ public interface TransactionRepository {
                 transaction
             WHERE
                 chat_id = #{chatId}
-                AND date_trunc('month', created) = date_trunc('month', CURRENT_DATE)
+                AND date_trunc('month', dated) = date_trunc('month', CURRENT_DATE)
             GROUP BY
                 type;
             """)

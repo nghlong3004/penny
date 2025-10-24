@@ -33,6 +33,7 @@ public abstract class HandlerService {
                                                                                   .lastName(penner.getLastName())
                                                                                   .spreadsheetsId(
                                                                                           penner.getSpreadsheetsId())
+                                                                                  .tips(true)
                                                                                   .build()));
     }
 
@@ -98,6 +99,23 @@ public abstract class HandlerService {
         String lastName = consumer.getLastName() == null ? "" : consumer.getLastName();
         String blank = lastName.isBlank() ? "" : " ";
         return firstName + blank + lastName;
+    }
+
+    protected boolean getTips(Long chatId) {
+        Consumer consumer = statuses.get(chatId);
+        if (consumer == null) {
+            return false;
+        }
+        return consumer.getTips();
+    }
+
+    protected void setTips(Long chatId) {
+        Consumer consumer = statuses.get(chatId);
+        if (consumer == null) {
+            return;
+        }
+        consumer.setTips(!consumer.getTips());
+        statuses.put(chatId, consumer);
     }
 
     protected void addPenner(Penner penner) {
