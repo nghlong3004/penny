@@ -2,6 +2,7 @@ package io.nghlong3004.penny.service.impl;
 
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
+import io.nghlong3004.penny.exception.ResourceException;
 import io.nghlong3004.penny.model.AIResponse;
 import io.nghlong3004.penny.service.TransactionParserService;
 import io.nghlong3004.penny.util.ObjectContainer;
@@ -17,15 +18,15 @@ public class GeminiTransactionParser extends TransactionParserService {
     private final String model;
 
     @Override
-    public AIResponse parser(String rawMessage) {
-        String rawText = ask(rawMessage);
+    public AIResponse parser(String rawMessage) throws ResourceException {
+        String rawText = ask(rawMessage, 4);
         String json = parserJson(rawText);
 
         return parserAIResponse(json);
     }
 
     @Override
-    public String ask(String rawMessage) {
+    public String ask(String rawMessage, int retry) throws ResourceException {
         try (Client client = Client.builder().apiKey(apiKey).build()) {
             String message = buildPrompt(rawMessage);
             GenerateContentResponse response = client.models.generateContent(model, message, null);
@@ -33,8 +34,13 @@ public class GeminiTransactionParser extends TransactionParserService {
             log.debug(rawText);
             return rawText;
         } catch (Exception e) {
-            log.debug(e.getLocalizedMessage());
-            return null;
+            if (retry > 0) {
+                log.info("Retry time={}", retry);
+                return ask(rawMessage, --retry);
+            }
+            else {
+                throw new ResourceException(e.getLocalizedMessage());
+            }
         }
     }
 

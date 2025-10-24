@@ -3,11 +3,9 @@ package io.nghlong3004.penny.telegram;
 import io.nghlong3004.penny.model.Animation;
 import io.nghlong3004.penny.model.Sticker;
 import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -46,6 +44,21 @@ public final class TelegramExecutor {
             }
             else {
                 log.error("Failed to send message to chatId={}, message = {}", chatId, e.getLocalizedMessage());
+            }
+        }
+    }
+
+    public void sendChatAction(Long chatId, ActionType actionType, int retryTime) {
+        try {
+            telegramClient.execute(SendChatAction.builder().chatId(chatId).action(actionType.toString()).build());
+            log.debug("Sent action={} to chatId={}", actionType, chatId);
+        } catch (TelegramApiException e) {
+            if (retryTime > 0) {
+                log.debug("Retry send action time: {}", retryTime);
+                sendChatAction(chatId, actionType, --retryTime);
+            }
+            else {
+                log.error("Failed to send chat action to chatId={}, action type = {}", chatId, actionType, e);
             }
         }
     }

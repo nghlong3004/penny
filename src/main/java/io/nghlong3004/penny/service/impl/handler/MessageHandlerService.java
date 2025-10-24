@@ -4,9 +4,12 @@ import io.nghlong3004.penny.model.Penner;
 import io.nghlong3004.penny.model.type.PennerType;
 import io.nghlong3004.penny.service.HandlerService;
 import io.nghlong3004.penny.util.FileLoaderUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
+@Slf4j
 public class MessageHandlerService extends HandlerService {
 
     private static volatile HandlerService instance;
@@ -19,6 +22,7 @@ public class MessageHandlerService extends HandlerService {
         if (instance == null) {
             synchronized (MessageHandlerService.class) {
                 if (instance == null) {
+                    log.info("Creating new MessageHandlerService instance...");
                     instance = new MessageHandlerService(textHandler, commandHandler, callbackHandler);
                 }
             }
@@ -28,7 +32,7 @@ public class MessageHandlerService extends HandlerService {
 
     @Override
     public void handle(Update update) {
-
+        log.debug("Received update. ID: {}", update.hashCode());
         if (update.hasMessage()) {
             handleMessage(update);
         }
@@ -43,6 +47,9 @@ public class MessageHandlerService extends HandlerService {
         Long chatId = update.getMessage().getChatId();
         Message message = update.getMessage();
         updateConsumes(message);
+        execute(chatId, ActionType.TYPING);
+        log.debug("Handling message for ChatID: {}. IsCommand: {}, HasText: {}", chatId, message.isCommand(),
+                  message.hasText());
         if (message.isCommand()) {
             commandHandler.handle(update);
         }
@@ -50,16 +57,19 @@ public class MessageHandlerService extends HandlerService {
             textHandler.handle(update);
         }
         if (getStatus(chatId) == PennerType.NOT_LINKED) {
+            log.debug("ChatID: {}. Status is NOT_LINKED, sending tips.", chatId);
             execute(chatId, FileLoaderUtil.loadFile("command/tips.html"));
         }
     }
 
     private void updateConsumes(Message message) {
         Long chatId = message.getChatId();
-        String firstName = message.getChat().getFirstName();
-        String lastName = message.getChat().getLastName();
         if (getStatus(chatId) == null) {
-            updateStatus(chatId, PennerType.NOT_LINKED);
+            String firstName = message.getChat().getFirstName();
+            String lastName = message.getChat().getLastName();
+
+            log.info("New user detected. Creating Penner for ChatID: {}. Name: {} {}", chatId, firstName, lastName);
+
             addPenner(ofPenner(chatId, firstName, lastName));
         }
     }

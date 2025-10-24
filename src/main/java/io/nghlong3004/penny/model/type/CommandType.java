@@ -7,7 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CommandType {
     START("/start", "command/start.html"),
-    STEPS("/steps", "images/step_"),
+    STEPS_WEB("/steps_web", "images/step_"),
+    STEPS_PHONE("/steps_phone", "images/step_"),
     SHEETS("/sheets_guide", "command/sheets_guide.html"),
     DEFAULT("", "command/default.html"),
     LINK("/link", "command/link.html"),

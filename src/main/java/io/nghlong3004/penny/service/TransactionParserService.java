@@ -1,6 +1,7 @@
 package io.nghlong3004.penny.service;
 
 import com.google.gson.Gson;
+import io.nghlong3004.penny.exception.ResourceException;
 import io.nghlong3004.penny.model.AIResponse;
 import io.nghlong3004.penny.util.FileLoaderUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +19,9 @@ public abstract class TransactionParserService {
 
     private final Gson gson;
 
-    public abstract AIResponse parser(String rawMessage);
+    public abstract AIResponse parser(String rawMessage) throws ResourceException;
 
-    public abstract String ask(String rawMessage);
+    public abstract String ask(String rawMessage, int retry) throws ResourceException;
 
     protected String buildPrompt(String rawMessage) {
         String currentDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);

@@ -19,8 +19,8 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
     }
 
     @Override
-    public String readFromSheet(String spreadsheetsId, String range) {
-        log.debug("Reading data from Google Sheets");
+    public String readFromSheet(String spreadsheetsId, String range) throws IOException {
+        log.debug("Reading data from Google Sheets. ID={}, range={}", spreadsheetsId, range);
         try {
             ValueRange response = ObjectContainer.getGoogleSheets()
                                                  .spreadsheets()
@@ -28,21 +28,17 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
                                                  .get(spreadsheetsId, range)
                                                  .execute();
             List<List<Object>> values = response.getValues();
-            if (values == null || values.isEmpty()) {
-                throw new RuntimeException("Data not found");
-            }
+            log.info("Reading data successfully from , ID={}, size rows={}", spreadsheetsId, values.size());
             return parseObjectToString(values);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("IOException read Google Sheets. ID: {}, Range: {}", spreadsheetsId, range, e);
+            throw e;
         }
     }
 
     @Override
-    public boolean writeToSheet(String spreadsheetsId, String range, List<List<Object>> data) {
-        log.debug("Write data to Google Sheets");
-        if (data == null || data.isEmpty()) {
-            throw new RuntimeException("No data to write");
-        }
+    public boolean writeToSheet(String spreadsheetsId, String range, List<List<Object>> data) throws IOException {
+        log.debug("Writing {} rows of data to Google Sheets. ID: {}, Range: {}", data.size(), spreadsheetsId, range);
         try {
             ValueRange body = new ValueRange().setValues(data);
             UpdateValuesResponse result = ObjectContainer.getGoogleSheets()
@@ -51,20 +47,24 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
                                                          .update(spreadsheetsId, range, body)
                                                          .setValueInputOption("USER_ENTERED")
                                                          .execute();
-            log.debug("{} cells updated successfully", result.getUpdatedCells());
+            log.info("Successfully updated {} cells in Sheet ID: {}, Range: {}", result.getUpdatedCells(),
+                     spreadsheetsId, range);
             return true;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("Failed to write to Google Sheets", e);
+            throw e;
         }
     }
 
     @Override
-    public boolean insertRowAbove(String spreadsheetsId, String sheetName, int rowIndex) {
-        log.debug("Inserting new row above rowIndex={} in sheetName={}", rowIndex, sheetName);
+    public boolean insertRowAbove(String spreadsheetsId, String sheetName, int rowIndex) throws IOException {
+        log.debug("Attempting to insert new row above rowIndex={} in sheetName={} (ID: {})", rowIndex, sheetName,
+                  spreadsheetsId);
         try {
             Integer sheetId = getSheetIdByName(spreadsheetsId, sheetName);
             if (sheetId == null) {
-                throw new RuntimeException("Sheet name" + sheetName + "not found");
+                log.warn("Sheet name {} not found in Spreadsheet ID: {}", sheetName, spreadsheetsId);
+                return false;
             }
             DimensionRange dimRange = new DimensionRange().setSheetId(sheetId)
                                                           .setDimension("ROWS")
@@ -76,10 +76,12 @@ public class GoogleSheetsProcessorExecutorImpl implements GoogleSheetsProcessorE
             BatchUpdateSpreadsheetRequest batchReq = new BatchUpdateSpreadsheetRequest().setRequests(
                     Collections.singletonList(request));
             ObjectContainer.getGoogleSheets().spreadsheets().batchUpdate(spreadsheetsId, batchReq).execute();
-            log.debug("Inserted row successfully.");
+            log.info("Successfully inserted row above rowIndex={} in sheetName={}", rowIndex, sheetName);
             return true;
         } catch (IOException e) {
-            throw new RuntimeException("Error inserting row", e);
+            log.error("Failed to insert row in Sheet ID: {}, Name: {}. Error: {}", spreadsheetsId, sheetName,
+                      e.getMessage(), e);
+            throw e;
         }
     }
 

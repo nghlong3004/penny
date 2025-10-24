@@ -10,4 +10,5 @@ public class Consumer {
     private PennerType status;
     private String firstName;
     private String lastName;
+    private String spreadsheetsId;
 }

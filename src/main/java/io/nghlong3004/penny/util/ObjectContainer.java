@@ -45,7 +45,8 @@ public final class ObjectContainer {
 
     private static final HandlerService COMMAND_HANDLER_SERVICE = CommandHandlerService.getInstance();
 
-    private static final HandlerService TEXT_HANDLER_SERVICE = TextHandlerService.getInstance();
+    private static final HandlerService TEXT_HANDLER_SERVICE = TextHandlerService.getInstance(
+            TRANSACTION_PARSER_SERVICE, TRANSACTION_SERVICE);
 
     private static final HandlerService CALLBACK_HANDLER_SERVICE = CallbackHandlerService.getInstance();
 
