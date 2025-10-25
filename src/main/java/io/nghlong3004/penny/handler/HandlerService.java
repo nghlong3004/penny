@@ -1,10 +1,11 @@
-package io.nghlong3004.penny.service;
+package io.nghlong3004.penny.handler;
 
 import io.nghlong3004.penny.model.Animation;
 import io.nghlong3004.penny.model.Consumer;
 import io.nghlong3004.penny.model.Penner;
 import io.nghlong3004.penny.model.Sticker;
 import io.nghlong3004.penny.model.type.PennerType;
+import io.nghlong3004.penny.service.PennerService;
 import io.nghlong3004.penny.telegram.TelegramExecutor;
 import io.nghlong3004.penny.util.InlineKeyboardUtil;
 import io.nghlong3004.penny.util.ObjectContainer;

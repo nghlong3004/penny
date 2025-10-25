@@ -21,6 +21,7 @@ public enum CommandType {
     FIND("/find", ""),
     UNDO("/undo", ""),
     OFF("/off", ""),
+    CHART("/chart", ""),
     HELP("/help", "command/help.html");
     private final String command;
     private final String detail;

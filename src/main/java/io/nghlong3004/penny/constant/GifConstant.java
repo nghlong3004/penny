@@ -23,5 +23,5 @@ public class GifConstant {
             "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExenlmZDVleGk2YXJ6anN5OTRnZG1tMDVscnFkYzVlamt0cjBjbm1qeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/TdfyKrN7HGTIY/giphy.gif",
             "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmppY244YTVtNDBzb2J4ejlhNHE3enk5YzIwbWI2MXMwdDNxMmswaiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/11sBLVxNs7v6WA/giphy.gif",
             "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzdxdGxiaGprZ3ZsOW0ycTEzdm9tejU4Z2ZwdXFmbmxlbHdpeWZ4diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/QsOUBOL6yz7NrFBrnP/giphy.gif"};
-
+    public static final String[] JOKE = {"images/joke_1.jpg"};
 }

@@ -1,6 +1,6 @@
 package io.nghlong3004.penny.telegram;
 
-import io.nghlong3004.penny.service.HandlerService;
+import io.nghlong3004.penny.handler.HandlerService;
 import io.nghlong3004.penny.util.ObjectContainer;
 import io.nghlong3004.penny.util.ThreadPoolUtil;
 import lombok.extern.slf4j.Slf4j;

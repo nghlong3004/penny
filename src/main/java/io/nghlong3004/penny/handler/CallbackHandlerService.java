@@ -1,11 +1,10 @@
-package io.nghlong3004.penny.service.impl.handler;
+package io.nghlong3004.penny.handler;
 
 import io.nghlong3004.penny.constant.GifConstant;
 import io.nghlong3004.penny.model.Animation;
 import io.nghlong3004.penny.model.type.CallbackType;
 import io.nghlong3004.penny.model.type.CommandType;
 import io.nghlong3004.penny.model.type.PennerType;
-import io.nghlong3004.penny.service.HandlerService;
 import io.nghlong3004.penny.util.FileLoaderUtil;
 import io.nghlong3004.penny.util.GifLoaderUtil;
 import lombok.extern.slf4j.Slf4j;

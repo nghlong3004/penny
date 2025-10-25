@@ -1,6 +1,6 @@
 package io.nghlong3004.penny.telegram;
 
-import io.nghlong3004.penny.service.HandlerService;
+import io.nghlong3004.penny.handler.HandlerService;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;

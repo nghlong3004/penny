@@ -1,4 +1,4 @@
-package io.nghlong3004.penny.service.impl.handler;
+package io.nghlong3004.penny.handler;
 
 import io.nghlong3004.penny.constant.GifConstant;
 import io.nghlong3004.penny.constant.TelegramConstant;
@@ -11,8 +11,8 @@ import io.nghlong3004.penny.model.TransactionSummary;
 import io.nghlong3004.penny.model.type.CallbackType;
 import io.nghlong3004.penny.model.type.CommandType;
 import io.nghlong3004.penny.model.type.PennerType;
-import io.nghlong3004.penny.service.HandlerService;
 import io.nghlong3004.penny.service.TransactionService;
+import io.nghlong3004.penny.util.ChartUtil;
 import io.nghlong3004.penny.util.FileLoaderUtil;
 import io.nghlong3004.penny.util.GifLoaderUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -120,6 +120,7 @@ public class CommandHandlerService extends HandlerService {
                 case MONTHLY -> commands.put(type, this::putMonthly);
                 case UNDO -> commands.put(type, this::putUndo);
                 case OFF -> commands.put(type, this::putOff);
+                case CHART -> commands.put(type, this::putChart);
                 default -> {
                     if (type != null && !type.isBlank()) {
                         String message = FileLoaderUtil.loadFile(cmd.getDetail());
@@ -131,9 +132,41 @@ public class CommandHandlerService extends HandlerService {
         log.info("Command map initialized with {} commands.", commands.size());
     }
 
+    private void putChart(Long chatId) {
+        List<TransactionSummary> transactionSummaries = transactionService.getTransactionSummary(chatId,
+                                                                                                 CommandType.MONTHLY);
+        Map<String, Double> data = new HashMap<>();
+        for (var transaction : transactionSummaries) {
+            data.put(transaction.type().toString(), transaction.totalAmount());
+        }
+        if (data.isEmpty()) {
+            execute(chatId, "Trời ơi bạn chưa có lần chi tiêu nào trong tháng thì làm sao mình vẽ biểu đồ đây");
+            execute(chatId, GifConstant.JOKE[0], "");
+            return;
+        }
+        Double savings = data.getOrDefault("SAVINGS", 0d);
+        String title = "Biểu đồ phần trăm (%)";
+        try {
+            String url = ChartUtil.getChartUrl(title, data);
+            if (savings == 0) {
+                execute(chatId, "Trời ơi bạn chưa có khoản thu nhập nào cả");
+            }
+            execute(chatId, Animation.builder().url(url).build());
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
+            execute(chatId, "Có chút lỗi khi vẽ biểu đồ");
+        }
+    }
+
     private void putOff(Long chatId) {
+        if (getStatus(chatId) != PennerType.NOT_LINKED) {
+            execute(chatId, "Bạn làm gì còn bị nhắc nhở");
+            execute(chatId, GifConstant.JOKE[0], "");
+            return;
+        }
         setTips(chatId);
         execute(chatId, "Tắt nhắc nhở tạo google sheets thành công!");
+        execute(chatId, GifConstant.JOKE[0], "");
         execute(chatId, Animation.builder().url(GifLoaderUtil.getRandomUrl(GifConstant.HAPPY)).caption(null).build());
     }
 
