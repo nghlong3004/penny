@@ -107,7 +107,7 @@ public abstract class HandlerService {
         if (consumer == null) {
             return false;
         }
-        return consumer.getTips();
+        return consumer.getTips() != null && consumer.getTips();
     }
 
     protected void setTips(Long chatId) {
